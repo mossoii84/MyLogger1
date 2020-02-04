@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%n</Property>
+        <!--указываем папку куда сохраняем, попка прямо в проекте видно ее слева-->
+        <Property name="APP_LOG_ROOT">./logs/</Property>
+    </Properties>
+
+    <!--механизмы ведения журнала, протоколирования, стандартный набор, можно менять-->
+    <Appenders>
+          <!--Выводим событие в консоль <Console -  target - SYSTEM_OUT-->
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+        </Console>
+
+        <!--Это запись в фаил определенного размера, когда фаил закончится, мы будем писать поверх него стирая старое-->
+        <RollingFile name="com.example.demo.NewController"
+                     fileName="${APP_LOG_ROOT}/newcontroller.log"
+                     filePattern="${APP_LOG_ROOT}/SpringBoot2App/application-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="19500KB" />
+            </Policies>
+            <DefaultRolloverStrategy max="1" />
+        </RollingFile>
+
+        <!--Добавилии для чтения только из Hibernate(из любого файла) и ниже добавили Logger для него-->
+        <!--Тут мы создадим  RollingFile с именем - name="com.example.demo.ControllerMy -->
+        <!--который создает для нас отдельный текстовый фаил (с названием -database.log), в нашей указаной папке(./logs/)-->
+        <!--С размером  size="19500KB"-->
+        <RollingFile name="com.example.demo.ControllerMy" fileName="${sys:APP_LOG_ROOT}/controllermy.log"
+                     filePattern="${sys:APP_LOG_ROOT}/spring-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="19500KB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+    </Appenders>
+    <Loggers>
+    <!--Сюда добавляем уже аппендоры разных частей программы например для hibernateLog-->
+    <!--Добавилии для чтения только из Hibernate , привязка к нему в RollingFile-->
+        <!--Ставим уровень  level="error", не дублировать ошибки additivity="false" и -->
+        <!--даем ему пусть к нашему RollingFile -  <AppenderRef ref="com.example.demo.ControllerMy" />-->
+        <Logger name="com.example.demo.ControllerMy" additivity="false" level="warn">
+            <AppenderRef ref="com.example.demo.ControllerMy" />
+            <AppenderRef ref="console"/>
+        </Logger>
+
+        <Logger name="com.example.demo.NewController" additivity="false" level="warn">
+            <AppenderRef ref="com.example.demo.NewController" />
+            <AppenderRef ref="Console" />
+        </Logger>
+
+        <!--выбираем вариант Уровень вывода:Warn,Debug,Error, Info  и т.д-->
+        <Root level="warn"> //>
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="appLog" />
+        </Root>
+    </Loggers>
+
+</Configuration>
